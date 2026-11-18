@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DODO CIPHER | ADAM</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#020704;color:#00ff66;
+ font-family:monospace;min-height:100vh;
+}
+header{text-align:center;padding:28px 12px;
+ border-bottom:1px solid #00ff66;
+ background:linear-gradient(#06200e,#020704)}
+h1{font-size:clamp(32px,8vw,55px);
+ text-shadow:0 0 18px #00ff66;margin:10px}
+header p{color:#9affb7}
+main{max-width:950px;margin:25px auto;padding:14px}
+.panel{border:1px solid #00aa44;background:#041009;
+ padding:20px;margin-bottom:18px;border-radius:12px;
+ box-shadow:0 0 15px #00ff6622}
+h2{font-size:19px;color:#00ff66}
+textarea{
+ width:100%;height:105px;background:#010603;
+ color:#9affb7;border:1px solid #00aa44;
+ border-radius:8px;padding:13px;font-size:18px;
+ resize:vertical;outline:none
+}
+button{
+ background:#063c1c;color:#00ff66;
+ border:1px solid #00ff66;padding:13px;
+ border-radius:8px;font-size:15px;
+ font-weight:bold;cursor:pointer
+}
+button:active{background:#00ff66;color:#000}
+.action{width:100%;margin-top:10px}
+.result{
+ background:#010603;border:1px solid #087d3a;
+ border-radius:8px;padding:15px;margin-top:12px;
+ min-height:55px;overflow-wrap:anywhere;
+ color:#8affad;font-size:20px;direction:auto
+}
+.small{font-size:13px;color:#80b895;line-height:1.8}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.map{display:grid;grid-template-columns:repeat(4,1fr);
+ gap:7px;margin-top:15px}
+.map div{background:#071b0d;border:1px solid #145c2e;
+ padding:8px;text-align:center;border-radius:5px}
+.map b{color:#00ff66}
+footer{text-align:center;padding:25px;color:#55966b}
+@media(max-width:650px){.grid{grid-template-columns:1fr}
+.map{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+ <p>WELCOME TO THE DARK NETWORK</p>
+ <h1>DODO CIPHER</h1>
+ <p>ARABIC TEXT ⇄ NUMBERS</p>
+ <p>DEVELOPED BY ADAM</p>
+</header>
+
+<main>
+ <section class="panel">
+  <h2>◈ تشفير الكلمات إلى أرقام</h2>
+  <textarea id="plain" placeholder="اكتب الكلمة أو الجملة هنا..."></textarea>
+  <button class="action" onclick="encode()">تحويل إلى أرقام</button>
+  <div class="result" id="encoded">النتيجة ستظهر هنا...</div>
+  <button class="action" onclick="copyResult('encoded')">نسخ الأرقام</button>
+ </section>
+
+ <section class="panel">
+  <h2>◈ فك الأرقام إلى كلمات</h2>
+  <textarea id="numbers" dir="ltr" placeholder="مثال: 24-6-24-8"></textarea>
+  <button class="action" onclick="decode()">تحويل إلى حروف</button>
+  <div class="result" id="decoded">النتيجة ستظهر هنا...</div>
+  <button class="action" onclick="copyResult('decoded')">نسخ الحروف</button>
+ </section>
+
+ <section class="panel">
+  <h2>◈ جدول شفرة الدودو</h2>
+  <div class="map" id="map"></div>
+  <p class="small">
+   المسافة بين الكلمات نرمز لها بعلامة /.
+   مثال: 24-6-24-8 = محمد
+  </p>
+ </section>
+
+ <section class="panel">
+  <h2>◈ عن الشفرة</h2>
+  <p class="small">
+   DODO CIPHER هي طريقة بسيطة لاستبدال الحروف العربية
+   بأرقام حسب ترتيب الأبجدية العربية.
+   تتم جميع عمليات التحويل داخل متصفحك.
+  </p>
+ </section>
+</main>
+
+<footer>ADAM DARK SYSTEM © 2026 | VERSION 1.0</footer>
+
+<script>
+const letters=[
+'ا','ب','ت','ث','ج','ح','خ','د','ذ','ر',
+'ز','س','ش','ص','ض','ط','ظ','ع','غ','ف',
+'ق','ك','ل','م','ن','ه','و','ي'
+];
+
+const normalize={
+'أ':'ا','إ':'ا','آ':'ا','ٱ':'ا',
+'ة':'ه','ى':'ي'
+};
+
+const toNumber={};
+const toLetter={};
+
+letters.forEach((letter,index)=>{
+ toNumber[letter]=index+1;
+ toLetter[index+1]=letter;
+});
+
+function encode(){
+ const text=document.getElementById('plain').value.trim();
+ if(!text){
+  document.getElementById('encoded').textContent='اكتب كلمة أولاً';
+  return;
+ }
+ const result=Array.from(text).map(char=>{
+  if(char===' ') return '/';
+  const letter=normalize[char]||char;
+  return toNumber[letter]||'?';
+ }).join('-').replace(/-\/-/g,' / ');
+ document.getElementById('encoded').textContent=result;
+}
+
+function decode(){
+ const input=document.getElementById('numbers').value.trim();
+ if(!input){
+  document.getElementById('decoded').textContent='اكتب الأرقام أولاً';
+  return;
+ }
+ const words=input.split('/');
+ const result=words.map(word=>{
+  const tokens=word.trim().split(/[\s,-]+/).filter(Boolean);
+  return tokens.map(token=>{
+   const n=Number(token);
+   return Number.isInteger(n)&&n>=1&&n<=28
+    ?toLetter[n]:'؟';
+  }).join('');
+ }).join(' ');
+ document.getElementById('decoded').textContent=result;
+}
+
+function copyResult(id){
+ const value=document.getElementById(id).textContent;
+ if(!value||value.includes('ستظهر')||value.includes('هنا')){
+  alert('لا توجد نتيجة لنسخها');
+  return;
+ }
+ if(navigator.clipboard){
+  navigator.clipboard.writeText(value)
+   .then(()=>alert('تم النسخ!'))
+   .catch(()=>alert('تعذر النسخ'));
+ }else{
+  alert('المتصفح لا يدعم النسخ المباشر');
+ }
+}
+
+document.getElementById('map').innerHTML=letters.map(
+ (letter,index)=>`<div><b>${letter}</b> = ${index+1}</div>`
+).join('');
+</script>
+</body>
+</html>
